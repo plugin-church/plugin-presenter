@@ -2,16 +2,21 @@
 	import { page } from '$app/stores';
 
 	import { onMount } from 'svelte';
-	import { fly } from 'svelte/transition';
+	import { fade, fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 	import type { LyricsMessage } from '../../messages';
+	import Button from '$lib/components/ui/button/button.svelte';
 
 	let lyric: LyricsMessage | null = {
 		type: 'lyrics',
 		content: $page.url.searchParams.get('title') ?? '',
 		direction: 'next'
 	};
+
 	let channel: BroadcastChannel;
+	let isFullscreen = false;
+	let isInFocus = false;
+
 	onMount(() => {
 		channel = new BroadcastChannel('lyrics');
 		channel.addEventListener('message', (event) => {
@@ -25,6 +30,20 @@
 		if (color) {
 			document.body.style.backgroundColor = color;
 		}
+
+		window.postMessage('mounted');
+		window.addEventListener('beforeunload', () => {
+			window.postMessage('closing');
+		});
+		document.addEventListener('fullscreenchange', () => {
+			isFullscreen = Boolean(document.fullscreenElement);
+		});
+		document.addEventListener('mouseleave', () => {
+			isInFocus = false;
+		});
+		document.addEventListener('mouseenter', () => {
+			isInFocus = true;
+		});
 	});
 
 	function topValue() {
@@ -34,9 +53,24 @@
 	function bottomValue() {
 		return window.innerHeight * 0.75;
 	}
+
+	function toggleFullScreen() {
+		if (!isFullscreen) {
+			document.documentElement.requestFullscreen();
+		} else if (document.exitFullscreen) {
+			document.exitFullscreen();
+		}
+	}
 </script>
 
-<div class="flex h-screen items-center justify-center overflow-hidden">
+<div class="flex flex-col h-screen items-center justify-center overflow-hidden">
+	{#if isInFocus}
+		<div transition:fade={{ duration: 150 }}>
+			<Button class="absolute right-2 top-2" on:click={() => toggleFullScreen()}>
+				{isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+			</Button>
+		</div>
+	{/if}
 	<div class="grid">
 		{#if lyric}
 			{#key lyric.content}
