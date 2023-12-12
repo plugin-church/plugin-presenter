@@ -57,7 +57,7 @@
 	let monitor: Window | null = null;
 	function openMonitor() {
 		monitor = window.open(
-			`/monitor?title=Song`,
+			`./monitor?title=Song`,
 			'plugin-presenter-monitor',
 			'toolbar=no,scrollbars=no,resizable=yes,width=800,height=600'
 		);
