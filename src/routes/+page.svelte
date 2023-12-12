@@ -87,7 +87,7 @@
 	}
 </script>
 
-<div class="grid grid-cols-2 justify-center w-screen h-screen">
+<div class="grid grid-cols-2 justify-center justify-items-center w-screen h-screen">
 	<div class="flex flex-col items-center justify-center max-w-screen-md gap-2">
 		<h1 class="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-2">
 			Plugin Presenter
