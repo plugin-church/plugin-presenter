@@ -7,17 +7,18 @@
 	import type { LyricsMessage } from '../../messages';
 	import Button from '$lib/components/ui/button/button.svelte';
 
-	let lyric: LyricsMessage | null = {
-		type: 'lyrics',
-		content: $page.url.searchParams.get('title') ?? '',
-		direction: 'next'
-	};
+	let lyric: LyricsMessage | null;
 
 	let channel: BroadcastChannel;
 	let isFullscreen = false;
 	let isInFocus = false;
 
 	onMount(() => {
+		lyric = {
+			type: 'lyrics',
+			content: $page.url.searchParams.get('title') ?? '',
+			direction: 'next'
+		};
 		channel = new BroadcastChannel('lyrics');
 		channel.addEventListener('message', (event) => {
 			const message: LyricsMessage = event.data;
