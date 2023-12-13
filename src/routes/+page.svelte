@@ -156,7 +156,7 @@
 			<Input
 				class="w-full col-span-10"
 				placeholder="Song Name"
-				value={$presentation.items[itemIndex].name}
+				value={$presentation.items[itemIndex]?.name}
 				on:input={handleChange('name')}
 			/>
 			<!-- <Button variant="secondary" size="icon" class="w-12">
@@ -165,7 +165,7 @@
 		</div>
 		<Textarea
 			class="w-full h-1/2"
-			value={$presentation.items[itemIndex].content}
+			value={$presentation.items[itemIndex]?.content}
 			on:input={handleChange('content')}
 			placeholder="Enter lyrics here"
 		/>
