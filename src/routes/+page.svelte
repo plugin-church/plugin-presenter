@@ -1,30 +1,59 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import type { LyricsMessage } from '../messages';
+	import type { Message } from '$lib/types/messages';
 
 	import { Button } from '$lib/components/ui/button';
 	import { Textarea } from '$lib/components/ui/textarea';
+	import Sidebar from './(components)/sidebar.svelte';
+	import Input from '$lib/components/ui/input/input.svelte';
+	import { SearchIcon } from 'lucide-svelte';
+	import SlidesPreview from './(components)/slides-preview.svelte';
+	import { presentation, type Presentation, type PresentationItem } from '$lib/presentation';
+	import type { Slide } from '$lib/types/slide';
 
-	let lyricContainer: HTMLDivElement | null;
-	let channel: BroadcastChannel;
+	let itemIndex = 0;
+	let slideIndex = 0;
+	let slidesChannel: BroadcastChannel;
+	let monitor: Window | null = null;
+
+	$: slides = generateSlides($presentation);
+
 	onMount(() => {
-		channel = new BroadcastChannel('lyrics');
-		window.addEventListener('keydown', (e) => {
-			switch (e.key) {
-				case ' ':
-				case 'ArrowRight':
-					e.preventDefault();
-					displayLyric(index + 1);
-					break;
-				case 'ArrowLeft':
-					e.preventDefault();
-					displayLyric(index - 1);
-					break;
-			}
-		});
+		slidesChannel = new BroadcastChannel('slides');
+		window.addEventListener('keydown', keyListener);
+		window.addEventListener('wheel', scrollListener);
+
+		return () => {
+			window.removeEventListener('keydown', keyListener);
+			window.removeEventListener('wheel', scrollListener);
+		};
 	});
 
-	let content: string | null;
+	function keyListener(e: KeyboardEvent) {
+		// if the focused element is not the body ignore
+		if (document.activeElement?.tagName != 'BODY') return;
+		switch (e.key) {
+			case ' ':
+			case 'ArrowRight':
+			case 'ArrowDown':
+				e.preventDefault();
+				nextSlide();
+				break;
+			case 'ArrowLeft':
+			case 'ArrowUp':
+				e.preventDefault();
+				prevSlide();
+				break;
+		}
+	}
+
+	let lastScroll: number;
+	function scrollListener(event: WheelEvent) {
+		if (document.activeElement?.tagName != 'BODY') return;
+		const didScrollDown = event.deltaY > 0;
+
+		didScrollDown ? nextSlide() : prevSlide();
+	}
 
 	function parseLyrics(content: string | null): string[] {
 		if (!content) return [];
@@ -46,24 +75,43 @@
 		return sections;
 	}
 
-	$: parsed = parseLyrics(content);
+	function generateSlides(pres: Presentation) {
+		let slides: Slide[] = [];
 
-	function scrollLyricIntoView() {
-		lyricContainer
-			?.querySelector(`#lyric-${index}`)
-			?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+		for (const item of pres.items) {
+			switch (item.type) {
+				case 'song':
+					slides.push({ type: 'text', content: `<strong>${item.name}</strong>` });
+					const lyrics = parseLyrics(item.content);
+					for (const lyric of lyrics) {
+						slides.push({
+							type: 'lyrics',
+							content: lyric
+						});
+					}
+					slides.push({ type: 'text', content: '' });
+					break;
+				case 'image':
+					slides.push({
+						type: 'image',
+						content: item.content
+					});
+					break;
+			}
+		}
+
+		return slides;
 	}
 
-	let monitor: Window | null = null;
 	function openMonitor() {
 		monitor = window.open(
 			`./monitor?title=Song`,
-			'plugin-presenter-monitor',
+			'plugin-presenter-monitor-live',
 			'toolbar=no,scrollbars=no,resizable=yes,width=800,height=600'
 		);
 		if (!monitor) return;
 		monitor.addEventListener('message', (event) => {
-			if (event.data == 'mounted') displayLyric(index);
+			if (event.data == 'mounted') setSlide(slideIndex);
 			if (event.data == 'closing') monitor = null;
 		});
 	}
@@ -74,56 +122,70 @@
 		monitor = null;
 	}
 
-	let index = 0;
-	function displayLyric(newIndex: number) {
-		channel?.postMessage({
-			type: 'lyrics',
-			content: parsed[newIndex],
-			direction: newIndex >= index ? 'next' : 'previous'
-		} as LyricsMessage);
-		index = newIndex;
+	function setSlide(newIndex: number) {
+		if (newIndex < 0) return;
+		if (newIndex > slides.length - 1) return;
+		slidesChannel?.postMessage({
+			direction: newIndex >= slideIndex ? 'next' : 'previous',
+			slide: slides[newIndex]
+		} as Message);
+		slideIndex = newIndex;
+	}
 
-		scrollLyricIntoView();
+	function nextSlide() {
+		setSlide(slideIndex + 1);
+	}
+
+	function prevSlide() {
+		setSlide(slideIndex - 1);
+	}
+
+	function handleChange(key: keyof PresentationItem) {
+		return (e: any) => {
+			presentation.update(itemIndex, { [key]: e.target.value ?? '' });
+		};
 	}
 </script>
 
-<div class="grid grid-cols-2 justify-center justify-items-center w-screen h-screen">
-	<div class="flex flex-col items-center justify-center max-w-screen-md gap-2">
-		<h1 class="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-2">
-			Plugin Presenter
-		</h1>
+<div class="grid grid-cols-12 justify-center justify-items-center w-screen h-screen gap-4">
+	<div class="flex flex-col items-center max-w-screen-md gap-2 col-span-2">
+		<Sidebar on:navigate={(e) => (itemIndex = e.detail)} />
+	</div>
+	<div class="flex flex-col items-center justify-center w-full gap-4 col-span-5">
+		<div class="flex flex-row gap-2 w-full">
+			<Input
+				class="w-full col-span-10"
+				placeholder="Song Name"
+				value={$presentation.items[itemIndex].name}
+				on:input={handleChange('name')}
+			/>
+			<!-- <Button variant="secondary" size="icon" class="w-12">
+				<SearchIcon class="h-4 w-4" />
+			</Button> -->
+		</div>
 		<Textarea
-			class="w-max"
-			bind:value={content}
-			rows={20}
-			cols={70}
+			class="w-full h-1/2"
+			value={$presentation.items[itemIndex].content}
+			on:input={handleChange('content')}
 			placeholder="Enter lyrics here"
 		/>
 		<div>
 			<Button class="mr-6" on:click={monitor ? closeMonitor : openMonitor}>
 				{monitor ? 'Close Monitor' : 'Open Monitor'}
 			</Button>
-			<Button on:click={() => displayLyric(index - 1)} disabled={index == 0}>Previous</Button>
-			<Button
-				on:click={() => displayLyric(index + 1)}
-				disabled={!parsed.length || parsed.length == index + 1}>Next</Button
+			<Button on:click={prevSlide} disabled={slideIndex == 0}>Previous</Button>
+			<Button on:click={nextSlide} disabled={!slides.length || slides.length == slideIndex + 1}
+				>Next</Button
 			>
 		</div>
 	</div>
-	<div class="flex flex-col items-center max-w-screen-md gap-2 overflow-y-hidden max-h-screen p-4">
-		<div bind:this={lyricContainer}>
-			{#if parsed.length}
-				{#each parsed as section, i}
-					<p
-						id={`lyric-${i}`}
-						class="text-xl whitespace-pre-line text-center mb-4 cursor-pointer select-none"
-						class:opacity-50={i != index}
-						on:click={() => displayLyric(i)}
-					>
-						{section}
-					</p>
-				{/each}
-			{/if}
-		</div>
+	<div
+		class="flex flex-col items-center w-full gap-2 overflow-y-hidden max-h-screen p-4 col-span-5"
+	>
+		<SlidesPreview
+			bind:slides
+			bind:currentIndex={slideIndex}
+			on:change={(e) => (slideIndex = e.detail)}
+		/>
 	</div>
 </div>

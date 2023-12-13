@@ -4,27 +4,19 @@
 	import { onMount } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-	import type { LyricsMessage } from '../../messages';
+	import type { Message } from '$lib/types/messages';
 	import Button from '$lib/components/ui/button/button.svelte';
 
-	let lyric: LyricsMessage | null;
+	let message: Message | null;
 
 	let channel: BroadcastChannel;
 	let isFullscreen = false;
 	let isInFocus = false;
 
 	onMount(() => {
-		lyric = {
-			type: 'lyrics',
-			content: $page.url.searchParams.get('title') ?? '',
-			direction: 'next'
-		};
-		channel = new BroadcastChannel('lyrics');
+		channel = new BroadcastChannel('slides');
 		channel.addEventListener('message', (event) => {
-			const message: LyricsMessage = event.data;
-			if (message?.type == 'lyrics') {
-				lyric = message;
-			}
+			message = event.data;
 		});
 
 		const color = $page.url.searchParams.get('color');
@@ -48,11 +40,11 @@
 	});
 
 	function topValue() {
-		return -window.innerHeight * 0.75;
+		return -window.innerHeight;
 	}
 
 	function bottomValue() {
-		return window.innerHeight * 0.75;
+		return window.innerHeight;
 	}
 
 	function toggleFullScreen() {
@@ -73,25 +65,45 @@
 		</div>
 	{/if}
 	<div class="grid">
-		{#if lyric}
-			{#key lyric.content}
-				<h2
-					class="xl:text-7xl lg:text-5xl md:text-4xl sm:text-3xl font-semibold tracking-tight transition-colors text-center whitespace-pre-line line leading-normal"
-					in:fly={{
-						duration: 500,
-						y: lyric.direction == 'next' ? bottomValue() : topValue(),
-						opacity: 0.5,
-						easing: quintOut
-					}}
-					out:fly={{
-						duration: 500,
-						y: lyric.direction == 'next' ? topValue() : bottomValue(),
-						opacity: 0.5,
-						easing: quintOut
-					}}
-				>
-					{lyric.content}
-				</h2>
+		{#if message}
+			{#key `${message.slide.type}-${message?.slide.content}`}
+				{#if message.slide.type == 'lyrics'}
+					<h2
+						class="xl:text-7xl lg:text-5xl md:text-4xl sm:text-3xl font-semibold tracking-tight transition-colors text-center whitespace-pre-line line leading-normal"
+						in:fly|global={{
+							duration: 500,
+							y: message.direction == 'next' ? bottomValue() : topValue(),
+							opacity: 0.5,
+							easing: quintOut
+						}}
+						out:fly|global={{
+							duration: 500,
+							y: message.direction == 'next' ? topValue() : bottomValue(),
+							opacity: 0.5,
+							easing: quintOut
+						}}
+					>
+						{message.slide.content}
+					</h2>
+				{:else if message.slide.type == 'text'}
+					<h2
+						class="xl:text-7xl lg:text-5xl md:text-4xl sm:text-3xl font-semibold tracking-tight transition-colors text-center whitespace-pre-line line leading-normal"
+						in:fly|global={{
+							duration: 500,
+							y: message.direction == 'next' ? bottomValue() : topValue(),
+							opacity: 0.5,
+							easing: quintOut
+						}}
+						out:fly|global={{
+							duration: 500,
+							y: message.direction == 'next' ? topValue() : bottomValue(),
+							opacity: 0.5,
+							easing: quintOut
+						}}
+					>
+						{@html message.slide.content}
+					</h2>
+				{/if}
 			{/key}
 		{/if}
 	</div>
