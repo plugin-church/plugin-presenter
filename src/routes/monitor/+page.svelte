@@ -11,13 +11,11 @@
 
 	let channel: BroadcastChannel;
 	let isFullscreen = false;
-	let isInFocus = false;
+	let isHovered = false;
 
 	onMount(() => {
 		channel = new BroadcastChannel('slides');
-		channel.addEventListener('message', (event) => {
-			message = event.data;
-		});
+		channel.addEventListener('message', messageListener);
 
 		const color = $page.url.searchParams.get('color');
 		if (color) {
@@ -32,12 +30,20 @@
 			isFullscreen = Boolean(document.fullscreenElement);
 		});
 		document.addEventListener('mouseleave', () => {
-			isInFocus = false;
+			isHovered = false;
 		});
 		document.addEventListener('mouseenter', () => {
-			isInFocus = true;
+			isHovered = true;
 		});
+
+		return () => {
+			channel.removeEventListener('message', messageListener);
+		};
 	});
+
+	function messageListener(event: MessageEvent) {
+		message = event.data;
+	}
 
 	function topValue() {
 		return -window.innerHeight;
@@ -57,7 +63,7 @@
 </script>
 
 <div class="flex flex-col h-screen items-center justify-center overflow-hidden">
-	{#if isInFocus}
+	{#if isHovered}
 		<div transition:fade={{ duration: 150 }}>
 			<Button class="absolute right-2 top-2" on:click={() => toggleFullScreen()}>
 				{isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
