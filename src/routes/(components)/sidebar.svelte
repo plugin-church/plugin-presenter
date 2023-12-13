@@ -45,15 +45,18 @@
 					</DropdownMenu.Trigger>
 					<DropdownMenu.Content class="w-48">
 						<DropdownMenu.Item
+							class="text-base font-semibold"
 							on:click={() => presentation.add({ type: 'song', name: 'New Song', content: '' })}
 						>
+							<MusicIcon {...iconProps} />
 							Song
 						</DropdownMenu.Item>
-						<DropdownMenu.Item
+						<!-- <DropdownMenu.Item
+						class="text-base font-semibold"
 							on:click={() => presentation.add({ type: 'image', name: 'New Image', content: '' })}
 						>
 							Image
-						</DropdownMenu.Item>
+						</DropdownMenu.Item> -->
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>
 			</div>
