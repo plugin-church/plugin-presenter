@@ -1,17 +1,26 @@
 <script lang="ts">
-	import { PlusIcon, MusicIcon, UnplugIcon } from 'lucide-svelte';
+	import { PlusIcon, MusicIcon, UnplugIcon, TextIcon, ImageIcon } from 'lucide-svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Separator } from '$lib/components/ui/separator';
-	import { presentation } from '$lib/presentation';
+	import { presentation, type PresentationItem } from '$lib/presentation';
 	import DeleteButton from '$lib/components/delete-button.svelte';
 	import { createEventDispatcher } from 'svelte';
+	import TextEditor from './text-editor.svelte';
+
+	export let itemIndex: number | null;
 
 	const iconProps = { class: 'mr-2 h-4 w-4' };
 
 	const dispatch = createEventDispatcher<{
 		navigate: number;
 	}>();
+
+	const typeIcon: Record<PresentationItem['type'], any> = {
+		song: MusicIcon,
+		text: TextIcon,
+		image: ImageIcon
+	};
 </script>
 
 <div class="w-full pb-4 space-y-4">
@@ -26,14 +35,12 @@
 			{#each $presentation.items as item, index}
 				<div class="flex space-x-2">
 					<Button
-						variant="secondary"
+						variant={itemIndex == index ? 'secondary' : 'outline'}
 						class="justify-start w-full"
 						on:click={() => dispatch('navigate', index)}
 					>
-						{#if item.type == 'song'}
-							<MusicIcon {...iconProps} />
-						{/if}
-						{item.name}
+						<svelte:component this={typeIcon[item.type]} {...iconProps} />
+						{item.name ?? item.type}
 					</Button>
 					<DeleteButton on:click={() => presentation.delete(index)} />
 				</div>
@@ -52,6 +59,13 @@
 					>
 						<MusicIcon {...iconProps} />
 						Song
+					</DropdownMenu.Item>
+					<DropdownMenu.Item
+						class="text-base font-semibold"
+						on:click={() => presentation.add({ type: 'text', content: '' })}
+					>
+						<TextIcon {...iconProps} />
+						Text
 					</DropdownMenu.Item>
 					<!-- <DropdownMenu.Item
 						class="text-base font-semibold"

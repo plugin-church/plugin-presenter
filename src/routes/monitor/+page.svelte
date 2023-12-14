@@ -62,7 +62,7 @@
 	}
 </script>
 
-<div class="flex flex-col h-screen items-center justify-center overflow-hidden">
+<div class="flex flex-col items-center justify-center h-screen overflow-hidden">
 	{#if isHovered}
 		<div transition:fade={{ duration: 150 }}>
 			<Button class="absolute right-2 top-2" on:click={() => toggleFullScreen()}>
@@ -75,7 +75,7 @@
 			{#key `${message.slide.type}-${message?.slide.content}`}
 				{#if message.slide.type == 'lyrics'}
 					<h2
-						class="xl:text-7xl lg:text-5xl md:text-4xl sm:text-3xl font-semibold tracking-tight transition-colors text-center whitespace-pre-line line leading-normal"
+						class="text-2xl font-semibold leading-normal tracking-tight text-center whitespace-pre-line transition-colors xl:text-7xl lg:text-6xl md:text-5xl sm:text-4xl line"
 						in:fly|global={{
 							duration: 500,
 							y: message.direction == 'next' ? bottomValue() : topValue(),
@@ -93,7 +93,7 @@
 					</h2>
 				{:else if message.slide.type == 'text'}
 					<h2
-						class="xl:text-7xl lg:text-5xl md:text-4xl sm:text-3xl font-semibold tracking-tight transition-colors text-center whitespace-pre-line line leading-normal"
+						class="font-semibold leading-normal tracking-tight text-center whitespace-pre-line transition-colors xl:text-7xl lg:text-5xl md:text-4xl sm:text-3xl line"
 						in:fly|global={{
 							duration: 500,
 							y: message.direction == 'next' ? bottomValue() : topValue(),

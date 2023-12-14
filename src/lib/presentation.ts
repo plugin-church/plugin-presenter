@@ -3,8 +3,8 @@ import { writable } from 'svelte/store';
 
 export type PresentationItem = {
 	type: 'song' | 'image' | 'text';
-	name: string;
-	content: string;
+	name?: string;
+	content?: string;
 };
 export type Presentation = {
 	name: string;

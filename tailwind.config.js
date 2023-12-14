@@ -1,10 +1,11 @@
 import { fontFamily } from "tailwindcss/defaultTheme";
+import resolveConfig from "tailwindcss/resolveConfig";
 
 /** @type {import('tailwindcss').Config} */
 const config = {
 	darkMode: ["class"],
 	content: ["./src/**/*.{html,js,svelte,ts}"],
-  safelist: ["dark"],
+	safelist: ["dark"],
 	theme: {
 		container: {
 			center: true,
@@ -62,3 +63,4 @@ const config = {
 };
 
 export default config;
+export const fullConfig = resolveConfig(config);

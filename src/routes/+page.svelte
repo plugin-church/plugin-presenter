@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import type { Message } from '$lib/types/messages';
 
-	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import Sidebar from './(components)/sidebar.svelte';
@@ -11,6 +10,10 @@
 	import { presentation, type Presentation, type PresentationItem } from '$lib/presentation';
 	import type { Slide } from '$lib/types/slide';
 	import { SearchIcon } from 'lucide-svelte';
+	import SongEditor from './(components)/song-editor.svelte';
+	import { breakpoint } from '$lib/breakpoint';
+	import Hidden from '$lib/components/ui/hidden/hidden.svelte';
+	import TextEditor from './(components)/text-editor.svelte';
 
 	let itemIndex: number | null = null;
 	let slideIndex = 0;
@@ -25,11 +28,9 @@
 		}
 		slidesChannel = new BroadcastChannel('slides');
 		window.addEventListener('keydown', keyListener);
-		window.addEventListener('wheel', scrollListener);
 
 		return () => {
 			window.removeEventListener('keydown', keyListener);
-			window.removeEventListener('wheel', scrollListener);
 		};
 	});
 
@@ -49,13 +50,6 @@
 				prevSlide();
 				break;
 		}
-	}
-
-	function scrollListener(event: WheelEvent) {
-		if (document.activeElement?.tagName != 'BODY') return;
-		const didScrollDown = event.deltaY > 0;
-
-		didScrollDown ? nextSlide() : prevSlide();
 	}
 
 	function parseLyrics(content: string | null): string[] {
@@ -84,7 +78,8 @@
 		for (const item of pres.items) {
 			switch (item.type) {
 				case 'song':
-					slides.push({ type: 'text', content: `<strong>${item.name}</strong>` });
+					if (item.name) slides.push({ type: 'text', content: `<strong>${item.name}</strong>` });
+					if (!item.content) break;
 					const lyrics = parseLyrics(item.content);
 					for (const lyric of lyrics) {
 						slides.push({
@@ -94,7 +89,12 @@
 					}
 					slides.push({ type: 'text', content: '' });
 					break;
+				case 'text':
+					if (!item.content) break;
+					slides.push({ type: 'text', content: item.content });
+					break;
 				case 'image':
+					if (!item.content) break;
 					slides.push({
 						type: 'image',
 						content: item.content
@@ -142,12 +142,6 @@
 	function prevSlide() {
 		setSlide(slideIndex - 1);
 	}
-
-	function handleChange(key: keyof PresentationItem) {
-		return (e: any) => {
-			presentation.update(itemIndex!, { [key]: e.target.value ?? '' });
-		};
-	}
 </script>
 
 <div
@@ -156,48 +150,44 @@
 	<div
 		class="flex flex-col items-center w-full max-w-screen-md gap-2 basis-full md:basis-auto md:max-w-[256px]"
 	>
-		<Sidebar on:navigate={(e) => (itemIndex = e.detail)} />
+		<Sidebar {itemIndex} on:navigate={(e) => (itemIndex = e.detail)} />
 	</div>
 	<div
-		class="flex flex-col items-center justify-center flex-grow w-full gap-4 sm:basis-full md:basis-1/2 lg:basis-9/12"
+		class="flex flex-col items-center flex-grow w-full gap-4 md:justify-center sm:basis-full md:basis-1/2 lg:basis-9/12"
 	>
 		{#if itemIndex != null}
-			<div class="flex flex-row w-full gap-2">
-				<Input
-					class="w-full col-span-10"
-					placeholder="Song Name"
-					value={$presentation.items[itemIndex]?.name}
-					on:input={handleChange('name')}
-				/>
-				<!-- <Button variant="secondary" size="icon" class="w-12">
-				<SearchIcon class="w-4 h-4" />
-			</Button> -->
-			</div>
-			<Textarea
-				class="w-full h-1/2"
-				value={$presentation.items[itemIndex]?.content}
-				on:input={handleChange('content')}
-				placeholder="Enter lyrics here"
-			/>
+			{@const selectedItem = $presentation.items[itemIndex]}
+
+			{#if selectedItem.type == 'song'}
+				<SongEditor {itemIndex} />
+			{:else if (selectedItem.type = 'text')}
+				<TextEditor {itemIndex} />
+			{/if}
 			<div>
 				<Button class="mr-6" on:click={monitor ? closeMonitor : openMonitor}>
 					{monitor ? 'Close Monitor' : 'Open Monitor'}
 				</Button>
 				<Button on:click={prevSlide} disabled={slideIndex == 0}>Previous</Button>
-				<Button on:click={nextSlide} disabled={!slides.length || slides.length == slideIndex + 1}
-					>Next</Button
-				>
+				<Button on:click={nextSlide} disabled={!slides.length || slides.length == slideIndex + 1}>
+					Next
+				</Button>
 			</div>
 		{/if}
 	</div>
 	<div
-		class="flex flex-col items-center w-full max-h-screen gap-2 overflow-y-scroll lg:overflow-y-hidden basis-full lg:basis-4/6"
+		class="flex flex-col items-center w-full max-h-screen gap-2 overflow-y-scroll lg:overflow-y-scroll basis-full lg:basis-4/6"
+		on:wheel={(e) => {
+			e.preventDefault();
+			const didScrollDown = e.deltaY > 0;
+
+			didScrollDown ? nextSlide() : prevSlide();
+		}}
 	>
 		{#if $presentation.items.length}
 			<SlidesPreview
 				bind:slides
 				bind:currentIndex={slideIndex}
-				on:change={(e) => (slideIndex = e.detail)}
+				on:change={(e) => setSlide(e.detail)}
 			/>
 		{/if}
 	</div>
