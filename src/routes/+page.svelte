@@ -2,14 +2,15 @@
 	import { onMount } from 'svelte';
 	import type { Message } from '$lib/types/messages';
 
+	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Textarea } from '$lib/components/ui/textarea';
 	import Sidebar from './(components)/sidebar.svelte';
 	import Input from '$lib/components/ui/input/input.svelte';
-	import { SearchIcon } from 'lucide-svelte';
 	import SlidesPreview from './(components)/slides-preview.svelte';
 	import { presentation, type Presentation, type PresentationItem } from '$lib/presentation';
 	import type { Slide } from '$lib/types/slide';
+	import { SearchIcon } from 'lucide-svelte';
 
 	let itemIndex: number | null = null;
 	let slideIndex = 0;
