@@ -13,7 +13,7 @@
 
 	function scrollIntoView(index: number) {
 		container
-			?.querySelector(`#slide-${index}`)
+			?.querySelector<HTMLDivElement>(`#slide-${index}`)
 			?.scrollIntoView({ behavior: 'smooth', block: 'center' });
 	}
 
@@ -23,18 +23,29 @@
 <div bind:this={container}>
 	{#if slides.length}
 		{#each slides as slide, index}
+			{@const isActive = index == currentIndex}
 			<div
 				id={`slide-${index}`}
-				class="first:mt-[50vh] last:mb-[50vh] cursor-pointer select-none mb-8"
-				class:opacity-50={index != currentIndex}
-				on:click={() => dispatch('change', index)}
+				class={`
+					lg:first:mt-[50vh] 
+					last:mb-[50vh] 
+					cursor-pointer 
+					select-none 
+					mb-8
+					transition-all 
+					delay-75 
+					outline-none 
+					${!isActive ? 'opacity-50' : 'bg-primary bg-opacity-25 rounded-md'}`}
+				role="button"
+				tabindex={index + 1}
+				on:focus={() => dispatch('change', index)}
 			>
 				{#if slide.type == 'lyrics'}
-					<p class="text-2xl whitespace-pre-line text-center">
+					<p class="text-2xl text-center whitespace-pre-line">
 						{slide.content}
 					</p>
 				{:else if slide.type == 'text'}
-					<p class="text-2xl whitespace-pre-line text-center">
+					<p class="text-2xl text-center whitespace-pre-line">
 						{#if slide.content}
 							{@html slide.content}
 						{:else}
