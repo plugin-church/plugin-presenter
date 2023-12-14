@@ -1,26 +1,21 @@
 # Plugin Presenter
 
-An incredibly basic web based presentation like Power Point, Pro Presenter, or Proclaim, specifically made for song lyrics. Just find the lyrics, copy and paste them into the lyrics, and hit start and you're good to go!
+A small web based presentation app (like Power Point, Pro Presenter, or Proclaim) specifically made for song lyrics!
+
+![Plugin Presenter Preview](./.github/screenshots/preview.png)
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+Once you've created a project and installed dependencies with `yarn install`, start a development server:
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+yarn run dev
 ```
 
 ## Building
 
-To create a production version of your app:
+To build for production:
 
 ```bash
-npm run build
+yarn run build
 ```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
