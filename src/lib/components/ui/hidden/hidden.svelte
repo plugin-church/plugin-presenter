@@ -5,10 +5,11 @@
 		getBreakpointValue
 	} from '$lib/breakpoint';
 
+	export let disabled = false;
 	export let breakpoint: Breakpoint;
 	export let direction: 'higher' | 'lower' | 'none';
 
-	$: isHidden = getIsHidden($windowBreakpoint);
+	$: isHidden = !disabled && getIsHidden($windowBreakpoint);
 
 	function getIsHidden(windowBreakpoint: Breakpoint) {
 		switch (direction) {

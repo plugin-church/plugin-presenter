@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
-	import { Textarea } from '$lib/components/ui/textarea';
 
 	import { presentation, type PresentationItem } from '$lib/presentation';
 
@@ -24,14 +23,18 @@
 		on:input={handleChange('name')}
 	/>
 </div>
-<div class="flex flex-col w-full h-1/2 gap-1.5">
-	<Label class="px-0.5" for="content">Text</Label>
-	<Textarea
+
+<div class="flex flex-col w-full gap-1.5">
+	<Label class="px-0.5" for="content">Image URL</Label>
+	<Input
 		name="content"
-		class="w-full h-full"
+		class="w-full col-span-10"
 		value={$presentation.items[itemIndex]?.content}
 		on:input={handleChange('content')}
-		placeholder="Enter text here"
-		rows={1}
+		placeholder="Enter Image URL here..."
 	/>
 </div>
+
+{#if $presentation.items[itemIndex].content}
+	<img src={$presentation.items[itemIndex].content} alt={$presentation.items[itemIndex]?.name} />
+{/if}
