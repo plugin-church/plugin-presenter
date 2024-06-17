@@ -6,10 +6,10 @@ A small web based presentation app (like Power Point, Pro Presenter, or Proclaim
 
 ## Developing
 
-Once you've created a project and installed dependencies with `yarn install`, start a development server:
+Once you've created a project and installed dependencies with `pnpm install`, start a development server:
 
 ```bash
-yarn run dev
+pnpm run dev
 ```
 
 ## Building
@@ -17,5 +17,5 @@ yarn run dev
 To build for production:
 
 ```bash
-yarn run build
+pnpm run build
 ```
