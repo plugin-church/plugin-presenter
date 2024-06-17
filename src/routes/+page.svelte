@@ -8,7 +8,7 @@
 	import Hidden from '$lib/components/ui/hidden/hidden.svelte';
 
 	import Sidebar from './(components)/sidebar.svelte';
-	import type { Slide } from '$lib/slides';
+	import { type Slide, slides, setSlide, nextSlide, prevSlide } from '$lib/slides';
 	import SlidesPreview from './(components)/slides-preview.svelte';
 	import { presentation, type Presentation, type PresentationItem } from '$lib/presentation';
 	import { ChevronLeftIcon, ChevronRightIcon, MenuIcon, SearchIcon } from 'lucide-svelte';
@@ -18,7 +18,6 @@
 	import ImageEditor from './(components)/image-editor.svelte';
 	import { fly } from 'svelte/transition';
 	import Branding from './(components)/branding.svelte';
-	import { slides } from '$lib/slides';
 	import { debounce } from 'lodash';
 	import ImportButton from './(components)/import-button.svelte';
 	import ExportButton from './(components)/export-button.svelte';
@@ -111,19 +110,6 @@
 		}
 
 		return slides;
-	}
-
-	const setSlide = debounce((newIndex: number) => {
-		if (newIndex < 0 || newIndex > $slides.items.length - 1) return;
-		slides.update((x) => ({ index: newIndex, items: x.items }));
-	}, 50);
-
-	function nextSlide() {
-		setSlide($slides.index + 1);
-	}
-
-	function prevSlide() {
-		setSlide($slides.index - 1);
 	}
 </script>
 

@@ -8,7 +8,7 @@
 	import SvelteMarkdown from 'svelte-markdown';
 	import List from '$lib/renderers/List.svelte';
 	import { derived } from 'svelte/store';
-	import { type Slide, slides } from '$lib/slides';
+	import { type Slide, slides, nextSlide, prevSlide } from '$lib/slides';
 	import type { PresentationStyle } from '$lib/presentation';
 	import Hr from '$lib/renderers/Hr.svelte';
 
@@ -112,10 +112,23 @@
 <div
 	class="flex flex-col items-center justify-center h-screen overflow-hidden transition-[background] duration-500"
 	style={styles}
+	role="none"
+	on:click={(e) => {
+		let middlehalf = window.innerHeight / 2;
+		if (e.clientY > middlehalf) {
+			nextSlide();
+		} else {
+			prevSlide();
+		}
+	}}
 >
 	{#if isHovered}
 		<div transition:fade={{ duration: 150 }}>
-			<Button class="absolute right-2 top-2" on:click={() => toggleFullScreen()}>
+			<Button
+				variant="outline"
+				class="absolute opacity-50 right-2 top-2"
+				on:click={() => toggleFullScreen()}
+			>
 				{isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
 			</Button>
 		</div>
