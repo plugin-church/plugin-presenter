@@ -38,5 +38,6 @@
 		value={$presentation.items[itemIndex]?.content}
 		on:input={handleChange('content')}
 		placeholder="Enter lyrics here"
+		rows={15}
 	/>
 </div>
