@@ -141,13 +141,13 @@
 						class="text-2xl font-semibold leading-normal tracking-tight text-center whitespace-pre-line transition-colors xl:text-7xl lg:text-6xl md:text-5xl sm:text-4xl line"
 						in:fly|global={{
 							duration: 500,
-							y: $state.direction == 'next' ? bottomValue() : topValue(),
+							y: bottomValue(), // $state.direction == 'next' ? bottomValue() : topValue(),
 							opacity: 0.5,
 							easing: quintOut
 						}}
 						out:fly|global={{
 							duration: 500,
-							y: $state.direction == 'next' ? topValue() : bottomValue(),
+							y: topValue(), // $state.direction == 'next' ? topValue() : bottomValue(),
 							opacity: 0.5,
 							easing: quintOut
 						}}
@@ -159,13 +159,13 @@
 						class="font-semibold leading-normal tracking-tight text-center whitespace-pre-line transition-colors prose:text-inherit xl:text-7xl lg:text-5xl md:text-4xl sm:text-3xl lin prose-p:my-0 prose-hr:my-12"
 						in:fly|global={{
 							duration: 500,
-							y: $state.direction == 'next' ? bottomValue() : topValue(),
+							y: bottomValue(), // $state.direction == 'next' ? bottomValue() : topValue(),
 							opacity: 0.5,
 							easing: quintOut
 						}}
 						out:fly|global={{
 							duration: 500,
-							y: $state.direction == 'next' ? topValue() : bottomValue(),
+							y: topValue(), // $state.direction == 'next' ? topValue() : bottomValue(),
 							opacity: 0.5,
 							easing: quintOut
 						}}
