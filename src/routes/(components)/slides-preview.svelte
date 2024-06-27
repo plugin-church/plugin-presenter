@@ -19,8 +19,9 @@
 
 		const element = document.getElementById(`slide-${index}`);
 
+		console.log(container.offsetTop);
 		container!.scrollTo({
-			top: (element?.offsetTop ?? 0) - window.innerHeight / 2,
+			top: (element?.offsetTop ?? 0) - (window.innerHeight + container.offsetTop) / 2,
 			behavior: 'smooth'
 		});
 	}
