@@ -15,15 +15,20 @@
 	}>();
 
 	function scrollIntoView(index: number) {
-		container
-			?.querySelector<HTMLDivElement>(`#slide-${index}`)
-			?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+		if (!container) return;
+
+		const element = document.getElementById(`slide-${index}`);
+
+		container!.scrollTo({
+			top: (element?.offsetTop ?? 0) - window.innerHeight / 2,
+			behavior: 'smooth'
+		});
 	}
 
 	$: scrollIntoView(currentIndex);
 </script>
 
-<div id="slides-container" class="w-full px-8" bind:this={container}>
+<div id="slides-container" class="w-full px-8 overflow-y-hidden" bind:this={container}>
 	{#if slides.length}
 		{#each slides as slide, index}
 			{@const isActive = index == currentIndex}
